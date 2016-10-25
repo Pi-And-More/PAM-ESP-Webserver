@@ -1,14 +1,29 @@
+//
+// Include the ESP8266WiFI library
+//
 #include <ESP8266WiFi.h>
 
+//
+// Fill in your own SSID and password
+//
 const char* ssid = "YourSSID";
 const char* password = "YourPassword";
 
+//
+// Initialize the WiFiServer
+//
 WiFiServer server(80);
 
 void setup() {
+  //
+  // Initialize serial output
+  //
   Serial.begin(115200);
   Serial.print("Connecting to ");
   Serial.println(ssid);
+  //
+  // Start the wifi and wait for a connection
+  //
   WiFi.begin(ssid,password);
   while (WiFi.status()!=WL_CONNECTED) {
     delay(500);
@@ -16,8 +31,14 @@ void setup() {
   }
   Serial.println("");
   Serial.println("WiFi connected");
+  //
+  // Start the webserver
+  //
   server.begin();
-  delay(10000);
+  delay(500);
+  //
+  // Show the IP of the server in serial monitor
+  //
   Serial.println("Web server running. The IP is:");
   Serial.println(WiFi.localIP());
 }
@@ -25,12 +46,21 @@ void setup() {
 void loop() {
   WiFiClient client = server.available();
   if (client) {
+    //
+    // A web client is asking for a page
+    //
     Serial.println("New client");
     boolean blank_line = true;
     while (client.connected()) {
+      //
+      // We need to read the request of the client
+      //
       if (client.available()) {
         char c = client.read();
         if (c == '\n' && blank_line) {
+          //
+          // We have read the request of the client. Now send the page
+          //
           client.println("HTTP/1.1 200 OK");
           client.println("Content-Type: text/html");
           client.println("Connection: close");
@@ -51,5 +81,5 @@ void loop() {
     client.stop();
     Serial.println("Client disconnected.");
   }
-}   
+}
 
